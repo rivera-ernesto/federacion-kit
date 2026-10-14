@@ -1,0 +1,37 @@
+---
+import Base from '../../layouts/Base.astro';
+import PageHead from '../../components/PageHead.astro';
+import ProductCard from '../../components/ProductCard.astro';
+import { getOrgs, getProductos, categorias, disponibilidades } from '../../lib/data';
+const [orgs, productos] = await Promise.all([getOrgs(), getProductos()]);
+const orgById = new Map(orgs.map((o) => [o.id, o]));
+---
+<Base title="Catálogo de productos" description="Pulpas de fruta, cacao silvestre, harinas, castaña y más, producidos por las asociaciones de la federación.">
+  <PageHead title="Catálogo de productos" lead="Filtra por categoría o disponibilidad y consulta directamente a la asociación productora." />
+  <section class="block">
+    <div class="wrap">
+      <form class="filters" data-filters hidden aria-label="Filtros del catálogo">
+        <div class="field">
+          <label for="f-cat">Categoría</label>
+          <select id="f-cat" data-filter="categoria">
+            <option value="">Todas</option>
+            {Object.entries(categorias).map(([k, v]) => <option value={k}>{v}</option>)}
+          </select>
+        </div>
+        <div class="field">
+          <label for="f-disp">Disponibilidad</label>
+          <select id="f-disp" data-filter="disponibilidad">
+            <option value="">Todas</option>
+            {Object.entries(disponibilidades).map(([k, v]) => <option value={k}>{v}</option>)}
+          </select>
+        </div>
+      </form>
+      <p class="status" data-filter-status aria-live="polite"></p>
+      <ul class="grid-cards">
+        {productos.map((p) => <ProductCard producto={p} org={orgById.get(p.data.organizacion)!} />)}
+      </ul>
+      <p class="empty" data-filter-empty hidden>No hay productos con esos filtros. Prueba con otra combinación.</p>
+    </div>
+  </section>
+  <script>import '../../scripts/filters';</script>
+</Base>

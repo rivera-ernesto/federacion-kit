@@ -1,0 +1,94 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHead from '../components/PageHead.astro';
+import { url } from '../lib/url';
+---
+<Base title="Mi lista de consulta" description="Tu lista de productos para consultar a las asociaciones por WhatsApp." noindex>
+  <PageHead title="Mi lista de consulta" lead="Reúne los productos que te interesan y envía una sola consulta por asociación. No es una tienda: no hay precios ni pagos." />
+  <section class="block">
+    <div class="wrap">
+      <noscript><p class="empty">La lista de consulta necesita JavaScript. Puedes consultar cada producto por WhatsApp desde su página.</p></noscript>
+      <div id="lista-vacia" class="empty" hidden>
+        <p>Tu lista está vacía.</p>
+        <a class="btn" href={url('/catalogo/')}>Explorar el catálogo</a>
+      </div>
+      <div id="lista-contenido" hidden>
+        <fieldset class="form-grid" style="border:0;padding:0;margin:0 0 1.5rem">
+          <legend class="sr-only">Tus datos</legend>
+          <div class="field"><label for="p-nombre">Tu nombre</label><input id="p-nombre" autocomplete="name" /></div>
+          <div class="field"><label for="p-ciudad">Ciudad de entrega</label><input id="p-ciudad" autocomplete="address-level2" /></div>
+        </fieldset>
+        <div id="grupos"></div>
+        <button type="button" class="btn ghost sm" id="vaciar">Vaciar la lista</button>
+      </div>
+    </div>
+  </section>
+  <script>
+    import { getLista, setLista, quitar, getPerfil, setPerfil } from '../scripts/lista';
+    const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
+    const nombre = $<HTMLInputElement>('p-nombre'), ciudad = $<HTMLInputElement>('p-ciudad');
+    const perfil = getPerfil();
+    nombre.value = perfil.nombre; ciudad.value = perfil.ciudad;
+    const saveProfile = () => setPerfil({ nombre: nombre.value, ciudad: ciudad.value });
+    nombre.addEventListener('input', saveProfile); ciudad.addEventListener('input', saveProfile);
+
+    const mensaje = (orgNombre: string, items: ReturnType<typeof getLista>) => {
+      const quien = nombre.value.trim() ? `Hola, soy ${nombre.value.trim()}${ciudad.value.trim() ? ` de ${ciudad.value.trim()}` : ''}.` : 'Hola.';
+      const lineas = items.map((i) => `- ${i.nombre}${i.nota.trim() ? ` (${i.nota.trim()})` : ''}`).join('\n');
+      return `${quien} Quisiera consultar disponibilidad y condiciones de estos productos de ${orgNombre}:\n${lineas}\n\nGracias.`;
+    };
+
+    function render() {
+      const lista = getLista();
+      $('lista-vacia').hidden = lista.length > 0;
+      $('lista-contenido').hidden = lista.length === 0;
+      const grupos = $('grupos');
+      grupos.replaceChildren();
+      const porOrg = new Map<string, typeof lista>();
+      lista.forEach((i) => porOrg.set(i.orgId, [...(porOrg.get(i.orgId) ?? []), i]));
+      for (const [, items] of porOrg) {
+        const sec = document.createElement('section');
+        sec.className = 'lista-group';
+        const h = document.createElement('h2');
+        h.style.fontSize = '1.25rem';
+        h.textContent = items[0].orgNombre;
+        sec.append(h);
+        items.forEach((it) => {
+          const row = document.createElement('div');
+          row.className = 'lista-item';
+          const a = document.createElement('a');
+          a.className = 'name'; a.href = it.href; a.textContent = it.nombre;
+          const input = document.createElement('input');
+          input.setAttribute('aria-label', `Cantidad o nota para ${it.nombre}`);
+          input.placeholder = 'Cantidad o nota (ej. 20 kg)';
+          input.value = it.nota;
+          input.addEventListener('input', () => {
+            setLista(getLista().map((x) => (x.slug === it.slug ? { ...x, nota: input.value } : x)));
+            updateLink();
+          });
+          const rm = document.createElement('button');
+          rm.type = 'button'; rm.className = 'btn ghost sm'; rm.textContent = 'Quitar';
+          rm.setAttribute('aria-label', `Quitar ${it.nombre} de la lista`);
+          rm.addEventListener('click', () => { quitar(it.slug); render(); });
+          row.append(a, input, rm);
+          sec.append(row);
+        });
+        const wa = document.createElement('a');
+        wa.className = 'btn wa'; wa.target = '_blank'; wa.rel = 'noopener';
+        wa.textContent = `Enviar consulta a ${items[0].orgNombre} por WhatsApp`;
+        const updateLink = () => {
+          const fresh = getLista().filter((x) => x.orgId === items[0].orgId);
+          wa.href = `https://wa.me/${items[0].orgWa}?text=${encodeURIComponent(mensaje(items[0].orgNombre, fresh))}`;
+        };
+        updateLink();
+        nombre.addEventListener('input', updateLink); ciudad.addEventListener('input', updateLink);
+        const wrap = document.createElement('div');
+        wrap.className = 'actions'; wrap.append(wa);
+        sec.append(wrap);
+        grupos.append(sec);
+      }
+    }
+    $('vaciar').addEventListener('click', () => { if (confirm('¿Vaciar toda la lista?')) { setLista([]); render(); } });
+    render();
+  </script>
+</Base>

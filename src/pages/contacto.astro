@@ -1,0 +1,60 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHead from '../components/PageHead.astro';
+import WaButton from '../components/WaButton.astro';
+import { siteConfig } from '../site.config';
+import { msgGeneral } from '../lib/whatsapp';
+const endpoint = siteConfig.formEndpoint.trim();
+---
+<Base title="Contacto" description={`Escríbenos por WhatsApp o correo: ${siteConfig.name}.`}>
+  <PageHead title="Contacto" lead="Cuéntanos qué necesitas y te respondemos lo antes posible." />
+  <section class="block">
+    <div class="wrap detail" style="padding-block:0">
+      <div>
+        <h2>Escríbenos</h2>
+        <div class="actions"><WaButton text={msgGeneral()} label="Escribir por WhatsApp" /></div>
+        <ul class="clean">
+          <li>WhatsApp: <a href={`https://wa.me/${siteConfig.whatsapp}`}>+{siteConfig.whatsapp}</a></li>
+          <li>Correo: <a href={`mailto:${siteConfig.email}`}>{siteConfig.email}</a></li>
+          <li>{siteConfig.address}</li>
+        </ul>
+      </div>
+      <div>
+        <h2>Formulario de consulta</h2>
+        <form id="consulta" method={endpoint ? 'post' : 'get'} action={endpoint || `mailto:${siteConfig.email}`} enctype={endpoint ? undefined : 'text/plain'}
+          data-wa={siteConfig.whatsapp} data-email={siteConfig.email} data-endpoint={endpoint}>
+          <div class="form-grid">
+            <div class="field"><label for="nombre">Nombre</label><input id="nombre" name="nombre" required autocomplete="name" /></div>
+            <div class="field"><label for="ciudad">Ciudad o empresa</label><input id="ciudad" name="ciudad" autocomplete="organization" /></div>
+          </div>
+          <div class="field" style="margin-bottom:1.25rem"><label for="mensaje">Mensaje</label><textarea id="mensaje" name="mensaje" required placeholder="Qué productos te interesan, cantidades aproximadas, ciudad de entrega…"></textarea></div>
+          <div class="actions" style="margin-top:0">
+            {endpoint ? (
+              <button class="btn" type="submit">Enviar consulta</button>
+            ) : (
+              <>
+                <button class="btn wa" type="submit" name="canal" value="wa">Enviar por WhatsApp</button>
+                <button class="btn ghost" type="submit" name="canal" value="mail">Enviar por correo</button>
+              </>
+            )}
+          </div>
+          <p class="note">{endpoint ? 'Tu consulta se envía a nuestro servicio de formularios.' : 'No usamos servidor: el botón abre WhatsApp o tu aplicación de correo con el mensaje ya escrito.'}</p>
+        </form>
+      </div>
+    </div>
+  </section>
+  <script>
+    const form = document.getElementById('consulta') as HTMLFormElement;
+    if (!form.dataset.endpoint) {
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const f = new FormData(form);
+        const texto = `Hola, soy ${f.get('nombre')}${f.get('ciudad') ? ` (${f.get('ciudad')})` : ''}.\n\n${f.get('mensaje')}`;
+        const canal = (e as SubmitEvent).submitter?.getAttribute('value');
+        window.location.href = canal === 'mail'
+          ? `mailto:${form.dataset.email}?subject=${encodeURIComponent('Consulta desde el sitio web')}&body=${encodeURIComponent(texto)}`
+          : `https://wa.me/${form.dataset.wa}?text=${encodeURIComponent(texto)}`;
+      });
+    }
+  </script>
+</Base>

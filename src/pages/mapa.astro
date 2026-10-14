@@ -1,0 +1,17 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHead from '../components/PageHead.astro';
+import MapView from '../components/MapView.astro';
+import { getOrgs } from '../lib/data';
+import { url } from '../lib/url';
+const orgs = await getOrgs();
+const puntos = orgs.map((o) => ({ nombre: o.data.nombre, lat: o.data.lat, lon: o.data.lon, href: url(`/directorio/${o.id}/`), detalle: `${o.data.municipio}, ${o.data.departamento}` }));
+---
+<Base title="Mapa de asociaciones" description="Ubicación de las asociaciones de productores de la federación en la Amazonía norte de Bolivia.">
+  <PageHead title="Mapa de asociaciones" lead="Toca un marcador para ver la asociación. Las ubicaciones de esta demostración son aproximadas e inventadas." />
+  <section class="block">
+    <div class="wrap">
+      <MapView puntos={puntos} size="tall" label="Mapa con las ubicaciones de las asociaciones" />
+    </div>
+  </section>
+</Base>

@@ -1,0 +1,30 @@
+---
+import Base from '../../layouts/Base.astro';
+import PageHead from '../../components/PageHead.astro';
+import OrgCard from '../../components/OrgCard.astro';
+import { getOrgs } from '../../lib/data';
+const orgs = await getOrgs();
+const municipios = [...new Set(orgs.map((o) => o.data.municipio))].sort((a, b) => a.localeCompare(b, 'es'));
+---
+<Base title="Directorio de asociaciones" description="Las asociaciones de productores de la federación: dónde están, qué producen y cómo contactarlas.">
+  <PageHead title="Directorio de asociaciones" lead="Conoce a quienes producen. Filtra por municipio." />
+  <section class="block">
+    <div class="wrap">
+      <form class="filters" data-filters hidden aria-label="Filtros">
+        <div class="field">
+          <label for="f-municipio">Municipio</label>
+          <select id="f-municipio" data-filter="municipio">
+            <option value="">Todos</option>
+            {municipios.map((m) => <option value={m}>{m}</option>)}
+          </select>
+        </div>
+      </form>
+      <p class="status" data-filter-status aria-live="polite"></p>
+      <ul class="grid-cards">
+        {orgs.map((o) => <OrgCard org={o} />)}
+      </ul>
+      <p class="empty" data-filter-empty hidden>No hay asociaciones con ese filtro.</p>
+    </div>
+  </section>
+  <script>import '../../scripts/filters';</script>
+</Base>

@@ -1,0 +1,94 @@
+---
+import Base from '../../layouts/Base.astro';
+import PageHead from '../../components/PageHead.astro';
+import WaButton from '../../components/WaButton.astro';
+import { render } from 'astro:content';
+import { getProductos, getOrgs, categorias, disponibilidades } from '../../lib/data';
+import { url, absoluteUrl } from '../../lib/url';
+import { msgProducto } from '../../lib/whatsapp';
+import { siteConfig } from '../../site.config';
+
+export async function getStaticPaths() {
+  const [productos, orgs] = await Promise.all([getProductos(), getOrgs()]);
+  return productos.map((producto) => ({
+    params: { slug: producto.id },
+    props: { producto, org: orgs.find((o) => o.id === producto.data.organizacion)! },
+  }));
+}
+const { producto, org } = Astro.props;
+const d = producto.data;
+const { Content } = await render(producto);
+const foto = d.foto ?? '/media/hero.svg';
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Product',
+  name: d.nombre,
+  description: `${d.nombre} de ${org.data.nombre}. ${categorias[d.categoria]}.`,
+  image: absoluteUrl(foto),
+  category: categorias[d.categoria],
+  brand: { '@type': 'Brand', name: org.data.nombre },
+  manufacturer: { '@type': 'Organization', name: org.data.nombre, url: absoluteUrl(`/directorio/${org.id}/`) },
+  url: absoluteUrl(`/catalogo/${producto.id}/`),
+};
+---
+<Base title={d.nombre} description={`${d.nombre} de ${org.data.nombre} (${org.data.municipio}). Consulta disponibilidad por WhatsApp.`} image={foto} ogType="website" jsonLd={jsonLd}>
+  <PageHead title={d.nombre} crumbs={[['Inicio', url('/')], ['Catálogo', url('/catalogo/')]]} />
+  <div class="wrap detail">
+    <div>
+      <img class="photo" src={url(foto)} alt={d.nombre} width="800" height="600" fetchpriority="high" />
+      <div class="prose" style="margin-top:1.5rem">
+        <h2>Características</h2>
+        <Content />
+      </div>
+    </div>
+    <aside>
+      <span class={`badge ${d.disponibilidad}`}>{disponibilidades[d.disponibilidad]}</span>
+      <dl class="facts" style="margin-top:.8rem">
+        <div><dt>Categoría</dt><dd>{categorias[d.categoria]}</dd></div>
+        <div><dt>Productor</dt><dd><a href={url(`/directorio/${org.id}/`)}>{org.data.nombre}</a></dd></div>
+        {d.temporada && <div><dt>Temporada</dt><dd>{d.temporada}</dd></div>}
+      </dl>
+      {d.presentaciones.length > 0 && (
+        <>
+          <h3>Presentaciones</h3>
+          <ul class="tags">{d.presentaciones.map((p) => <li>{p}</li>)}</ul>
+        </>
+      )}
+      <div class="actions">
+        <WaButton text={msgProducto(d.nombre, org.data.nombre)} number={org.data.contacto.whatsapp} label="Consultar por WhatsApp" />
+        <button
+          type="button"
+          class="btn ghost"
+          id="agregar"
+          hidden
+          data-slug={producto.id}
+          data-nombre={d.nombre}
+          data-href={url(`/catalogo/${producto.id}/`)}
+          data-org-id={org.id}
+          data-org-nombre={org.data.nombre}
+          data-org-wa={org.data.contacto.whatsapp}
+        >Agregar a mi lista de consulta</button>
+      </div>
+      <p class="note">La lista de consulta no es una tienda: no hay precios ni pagos. Sirve para enviar un solo mensaje por asociación. <a href={url('/mi-lista/')}>Ver mi lista</a>.</p>
+      <p class="note">Contacto de la asociación: +{org.data.contacto.whatsapp}. Si prefieres hablar con la federación, escribe a +{siteConfig.whatsapp}.</p>
+    </aside>
+  </div>
+  <script>
+    import { agregar, quitar, enLista } from '../../scripts/lista';
+    const btn = document.getElementById('agregar') as HTMLButtonElement;
+    const paint = () => {
+      const en = enLista(btn.dataset.slug!);
+      btn.textContent = en ? 'En tu lista · quitar' : 'Agregar a mi lista de consulta';
+      btn.setAttribute('aria-pressed', String(en));
+    };
+    btn.hidden = false;
+    btn.addEventListener('click', () => {
+      const slug = btn.dataset.slug!;
+      if (enLista(slug)) quitar(slug);
+      else agregar({ slug, nombre: btn.dataset.nombre!, href: btn.dataset.href!, orgId: btn.dataset.orgId!, orgNombre: btn.dataset.orgNombre!, orgWa: btn.dataset.orgWa!, nota: '' });
+      paint();
+    });
+    window.addEventListener('lista:cambio', paint);
+    paint();
+  </script>
+</Base>

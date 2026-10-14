@@ -1,0 +1,18 @@
+items:
+  - imagen: /media/gal-1.svg
+    descripcion: "El río que conecta a las comunidades"
+  - imagen: /media/gal-2.svg
+    descripcion: "Racimos de asaí recién cosechados"
+    video: https://www.youtube.com/watch?v=EJEMPLO12345
+  - imagen: /media/gal-3.svg
+    descripcion: "Frutos de cacao silvestre"
+  - imagen: /media/gal-4.svg
+    descripcion: "Puestos de la feria de productos"
+  - imagen: /media/gal-5.svg
+    descripcion: "Castaña recolectada y lista para pelar"
+  - imagen: /media/gal-6.svg
+    descripcion: "Bosque en pie en la zona de recolección"
+  - imagen: /media/gal-7.svg
+    descripcion: "Miel de abejas nativas"
+  - imagen: /media/gal-8.svg
+    descripcion: "Casa comunal junto al río"

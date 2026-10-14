@@ -1,0 +1,50 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHead from '../components/PageHead.astro';
+import { getGaleria, youtubeEmbed } from '../lib/data';
+import { url } from '../lib/url';
+const items = await getGaleria();
+---
+<Base title="Galería" description="Fotos y videos del bosque, la cosecha y las asociaciones de la federación.">
+  <PageHead title="Galería" lead="Imágenes del bosque, la cosecha y el trabajo de las asociaciones." />
+  <section class="block">
+    <div class="wrap">
+      <ul class="gal">
+        {items.map((it) => {
+          const embed = it.video ? youtubeEmbed(it.video) : null;
+          return (
+            <li>
+              <figure>
+                {embed ? (
+                  <div class="video" data-embed={embed} data-title={it.descripcion}>
+                    <img src={url(it.imagen)} alt="" width="800" height="600" loading="lazy" decoding="async" />
+                    <button type="button" aria-label={`Reproducir video: ${it.descripcion}`}>▶</button>
+                  </div>
+                ) : (
+                  <img src={url(it.imagen)} alt={it.descripcion} width="800" height="600" loading="lazy" decoding="async" />
+                )}
+                <figcaption>{it.descripcion}{embed ? ' (video)' : ''}</figcaption>
+              </figure>
+            </li>
+          );
+        })}
+      </ul>
+      <noscript><p class="note">Los videos se abren con JavaScript. Enlaces: {items.filter((i) => i.video).map((i) => <a href={i.video}>{i.descripcion}</a>)}</p></noscript>
+    </div>
+  </section>
+  <script>
+    // El video de YouTube (youtube-nocookie) solo se carga cuando la persona lo pide.
+    document.querySelectorAll<HTMLElement>('.video[data-embed]').forEach((box) => {
+      box.querySelector('button')?.addEventListener('click', () => {
+        const f = document.createElement('iframe');
+        f.src = `${box.dataset.embed}?autoplay=1&rel=0`;
+        f.title = box.dataset.title ?? 'Video';
+        f.allow = 'autoplay; encrypted-media; picture-in-picture';
+        f.allowFullscreen = true;
+        f.loading = 'lazy';
+        f.referrerPolicy = 'strict-origin-when-cross-origin';
+        box.replaceChildren(f);
+      });
+    });
+  </script>
+</Base>

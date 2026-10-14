@@ -1,0 +1,151 @@
+# Configuración de Pages CMS (https://pagescms.org) para este sitio.
+# Sintaxis tomada de https://pagescms.org/docs/configuration/ (ver README, sección "Panel de edición").
+
+media:
+  input: public/media
+  output: /media
+  rename: safe
+  extensions: [jpg, jpeg, png, webp, svg]
+
+content:
+  # ---------------------------------------------------------------- Organizaciones
+  - name: organizaciones
+    label: Organizaciones
+    type: collection
+    path: src/content/organizaciones
+    format: yaml-frontmatter
+    filename: "{primary}.md"
+    view:
+      fields: [nombre, sigla, municipio]
+      primary: nombre
+      sort: [nombre, municipio]
+      default:
+        sort: nombre
+        order: asc
+    fields:
+      - { name: nombre, label: Nombre completo, type: string, required: true }
+      - { name: sigla, label: Sigla, type: string, required: true }
+      - { name: municipio, label: Municipio, type: string, required: true }
+      - { name: departamento, label: Departamento, type: string, required: true }
+      - { name: lat, label: Latitud (ej. -11.05), type: number, required: true }
+      - { name: lon, label: Longitud (ej. -66.10), type: number, required: true }
+      - { name: descripcion, label: Descripción corta (una o dos frases), type: text, required: true }
+      - name: fotos
+        label: Fotos
+        type: image
+        list: true
+      - { name: capacidad, label: Capacidad de producción (ej. "12 t de pulpa por zafra"), type: string, required: true }
+      - { name: familias, label: Familias socias, type: number, required: true }
+      - name: contacto
+        label: Contacto
+        type: object
+        fields:
+          - { name: whatsapp, label: WhatsApp (formato internacional, solo dígitos, ej. 59170000000), type: string, required: true }
+          - { name: email, label: Correo electrónico, type: string, required: true }
+          - name: canales
+            label: Canales de venta (opcional)
+            type: object
+            list: true
+            fields:
+              - { name: nombre, label: Nombre del canal, type: string }
+              - { name: url, label: Enlace (https://…), type: string }
+      - { name: body, label: Descripción institucional, type: rich-text }
+
+  # ---------------------------------------------------------------- Productos
+  - name: productos
+    label: Productos
+    type: collection
+    path: src/content/productos
+    format: yaml-frontmatter
+    filename: "{primary}.md"
+    view:
+      fields: [nombre, categoria, disponibilidad]
+      primary: nombre
+      sort: [nombre, categoria]
+      default:
+        sort: nombre
+        order: asc
+    fields:
+      - { name: nombre, label: Nombre del producto, type: string, required: true }
+      - name: categoria
+        label: Categoría
+        type: select
+        required: true
+        options:
+          values:
+            - { name: pulpas, label: Pulpas de fruta }
+            - { name: cacao, label: Cacao }
+            - { name: harinas, label: Harinas }
+            - { name: otros, label: Otros }
+      - name: organizacion
+        label: Asociación productora
+        type: reference
+        required: true
+        options:
+          collection: organizaciones
+          search: nombre
+          value: "{path}"
+          label: "{fields.nombre}"
+      - name: presentaciones
+        label: Presentaciones (agregue una por vez, ej. "Bolsa de 500 g")
+        type: string
+        list: true
+      - name: disponibilidad
+        label: Disponibilidad
+        type: select
+        required: true
+        options:
+          values:
+            - { name: disponible, label: Disponible }
+            - { name: por-pedido, label: Por pedido }
+            - { name: fuera-de-temporada, label: Fuera de temporada }
+      - { name: temporada, label: Temporada (ej. "Febrero a mayo"), type: string }
+      - { name: foto, label: Foto, type: image }
+      - { name: body, label: Características, type: rich-text }
+
+  # ---------------------------------------------------------------- Noticias
+  - name: noticias
+    label: Noticias
+    type: collection
+    path: src/content/noticias
+    format: yaml-frontmatter
+    filename: "{primary}.md"
+    view:
+      fields: [titulo, tipo, fecha]
+      primary: titulo
+      sort: [fecha, titulo]
+      default:
+        sort: fecha
+        order: desc
+    fields:
+      - { name: titulo, label: Título, type: string, required: true }
+      - { name: fecha, label: Fecha, type: date, required: true, options: { format: yyyy-MM-dd } }
+      - name: tipo
+        label: Tipo
+        type: select
+        required: true
+        options:
+          values:
+            - { name: noticia, label: Noticia }
+            - { name: feria, label: Feria }
+            - { name: evento, label: Evento }
+            - { name: oportunidad, label: Oportunidad }
+      - { name: resumen, label: Resumen (una o dos frases), type: text, required: true }
+      - { name: foto, label: Foto (opcional), type: image }
+      - { name: body, label: Texto, type: rich-text }
+
+  # ---------------------------------------------------------------- Galería
+  - name: galeria
+    label: Galería
+    type: file
+    path: src/content/galeria/galeria.yaml
+    format: yaml
+    fields:
+      - name: items
+        label: Fotos y videos
+        type: object
+        list: true
+        fields:
+          - { name: imagen, label: Imagen, type: image, required: true }
+          - { name: descripcion, label: Descripción (también es el texto alternativo), type: string, required: true }
+          - { name: video, label: Enlace de YouTube (opcional), type: string }

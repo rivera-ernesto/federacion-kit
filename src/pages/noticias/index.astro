@@ -1,0 +1,17 @@
+---
+import Base from '../../layouts/Base.astro';
+import PageHead from '../../components/PageHead.astro';
+import NewsCard from '../../components/NewsCard.astro';
+import { getNoticias } from '../../lib/data';
+const noticias = await getNoticias();
+---
+<Base title="Noticias" description="Noticias, ferias, eventos y oportunidades de la federación y sus asociaciones.">
+  <PageHead title="Noticias" lead="Ferias, eventos, oportunidades y novedades de las asociaciones." />
+  <section class="block">
+    <div class="wrap">
+      <ul class="grid-cards">
+        {noticias.map((n) => <NewsCard noticia={n} />)}
+      </ul>
+    </div>
+  </section>
+</Base>

@@ -1,0 +1,16 @@
+---
+import type { Producto, Org } from '../lib/data';
+import { categorias, disponibilidades } from '../lib/data';
+import { url } from '../lib/url';
+interface Props { producto: Producto; org: Org }
+const { producto, org } = Astro.props;
+const d = producto.data;
+---
+<li class="card" data-filter-item data-categoria={d.categoria} data-disponibilidad={d.disponibilidad}>
+  <img src={url(d.foto ?? '/media/hero.svg')} alt={d.nombre} width="800" height="600" loading="lazy" decoding="async" />
+  <div class="body">
+    <span class={`badge ${d.disponibilidad}`}>{disponibilidades[d.disponibilidad]}</span>
+    <h3><a href={url(`/catalogo/${producto.id}/`)}>{d.nombre}</a></h3>
+    <p class="meta">{categorias[d.categoria]} · {org.data.nombre}</p>
+  </div>
+</li>

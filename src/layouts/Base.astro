@@ -1,0 +1,110 @@
+---
+import '../styles/global.css';
+import { siteConfig } from '../site.config';
+import { url, absoluteUrl } from '../lib/url';
+
+interface Props {
+  title: string;
+  description?: string;
+  image?: string;
+  ogType?: 'website' | 'article';
+  jsonLd?: Record<string, unknown>;
+  noindex?: boolean;
+}
+const { title, description = siteConfig.description, image = '/media/og-default.png', ogType = 'website', jsonLd, noindex = false } = Astro.props;
+
+const fullTitle = title === siteConfig.shortName ? `${siteConfig.name}` : `${title} · ${siteConfig.shortName}`;
+const canonical = new URL(Astro.url.pathname, Astro.site).href;
+const nav = [
+  ['Inicio', '/'],
+  ['La Federación', '/la-federacion/'],
+  ['Directorio', '/directorio/'],
+  ['Catálogo', '/catalogo/'],
+  ['Mapa', '/mapa/'],
+  ['Galería', '/galeria/'],
+  ['Noticias', '/noticias/'],
+  ['Contacto', '/contacto/'],
+] as const;
+const current = Astro.url.pathname;
+const isCurrent = (href: string) => {
+  const u = url(href);
+  return href === '/' ? current === u : current.startsWith(u);
+};
+const c = siteConfig.colors;
+---
+<!doctype html>
+<html lang={siteConfig.lang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    {noindex && <meta name="robots" content="noindex" />}
+    <meta name="theme-color" content={c.forest} />
+    <link rel="icon" href={url('/favicon.svg')} type="image/svg+xml" />
+    <meta property="og:type" content={ogType} />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:site_name" content={siteConfig.name} />
+    <meta property="og:locale" content={siteConfig.locale.replace('-', '_')} />
+    <meta property="og:image" content={absoluteUrl(image)} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <style is:inline set:html={`:root{--forest:${c.forest};--forest-dark:${c.forestDark};--earth:${c.earth};--cream:${c.cream};--asai:${c.asai}}`}></style>
+    <script is:inline>document.documentElement.classList.add('js')</script>
+    {jsonLd && <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />}
+    <slot name="head" />
+  </head>
+  <body>
+    <a class="skip" href="#contenido">Saltar al contenido</a>
+    <div class="demo" role="note">{siteConfig.demoNotice}</div>
+    <header class="site-header">
+      <div class="wrap bar">
+        <a class="brand" href={url('/')} aria-label={`${siteConfig.name}, inicio`}>
+          <svg width="34" height="34" viewBox="0 0 34 34" aria-hidden="true"><circle cx="17" cy="17" r="17" fill="var(--forest)"/><path d="M9 22c0-8 6-12 16-13-1 9-5 15-13 14" fill="#8bb58a"/><path d="M10 25c4-6 8-9 13-12" stroke="#f7f1e3" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg>
+          <span>{siteConfig.shortName}<small>{siteConfig.name}</small></span>
+        </a>
+        <button class="menu-btn" type="button" aria-expanded="false" aria-controls="menu">Menú</button>
+        <nav class="nav" id="menu" aria-label="Principal">
+          {nav.map(([label, href]) => <a href={url(href)} aria-current={isCurrent(href) ? 'page' : undefined}>{label}</a>)}
+          <a class="lista-link" href={url('/mi-lista/')} aria-current={isCurrent('/mi-lista/') ? 'page' : undefined}>Mi lista<span class="count" data-lista-count data-n="0" aria-label="productos en la lista">0</span></a>
+        </nav>
+      </div>
+    </header>
+    <main id="contenido">
+      <slot />
+    </main>
+    <footer class="site-footer">
+      <div class="wrap">
+        <div class="foot-grid">
+          <div>
+            <h2>{siteConfig.name}</h2>
+            <p>{siteConfig.tagline}.</p>
+          </div>
+          <div>
+            <h2>Escríbenos</h2>
+            <ul>
+              <li><a href={`https://wa.me/${siteConfig.whatsapp}`}>WhatsApp: +{siteConfig.whatsapp}</a></li>
+              <li><a href={`mailto:${siteConfig.email}`}>{siteConfig.email}</a></li>
+              {siteConfig.social.facebook && <li><a href={siteConfig.social.facebook} rel="noopener">Facebook</a></li>}
+              {siteConfig.social.instagram && <li><a href={siteConfig.social.instagram} rel="noopener">Instagram</a></li>}
+              {siteConfig.social.youtube && <li><a href={siteConfig.social.youtube} rel="noopener">YouTube</a></li>}
+            </ul>
+          </div>
+          <div>
+            <h2>Secciones</h2>
+            <ul>
+              <li><a href={url('/directorio/')}>Asociaciones</a></li>
+              <li><a href={url('/catalogo/')}>Catálogo</a></li>
+              <li><a href={url('/noticias/')}>Noticias</a></li>
+              <li><a href={url('/admin/')}>Editar el sitio</a></li>
+            </ul>
+          </div>
+        </div>
+        <p class="legal">{siteConfig.demoNotice} Contenido de demostración bajo licencia CC BY 4.0. Mapas © colaboradores de OpenStreetMap.</p>
+      </div>
+    </footer>
+    <script>import '../scripts/shell';</script>
+  </body>
+</html>

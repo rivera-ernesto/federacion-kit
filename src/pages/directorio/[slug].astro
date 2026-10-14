@@ -1,0 +1,65 @@
+---
+import Base from '../../layouts/Base.astro';
+import PageHead from '../../components/PageHead.astro';
+import ProductCard from '../../components/ProductCard.astro';
+import WaButton from '../../components/WaButton.astro';
+import MapView from '../../components/MapView.astro';
+import { render } from 'astro:content';
+import { getOrgs, getProductos } from '../../lib/data';
+import { url } from '../../lib/url';
+import { msgOrganizacion } from '../../lib/whatsapp';
+
+export async function getStaticPaths() {
+  const orgs = await getOrgs();
+  return orgs.map((org) => ({ params: { slug: org.id }, props: { org } }));
+}
+const { org } = Astro.props;
+const d = org.data;
+const { Content } = await render(org);
+const productos = (await getProductos()).filter((p) => p.data.organizacion === org.id);
+---
+<Base title={d.nombre} description={d.descripcion} image={d.fotos[0]}>
+  <PageHead title={d.nombre} lead={d.descripcion} crumbs={[['Inicio', url('/')], ['Directorio', url('/directorio/')]]} />
+  <div class="wrap detail">
+    <div>
+      <img class="photo" src={url(d.fotos[0] ?? '/media/hero.svg')} alt={`Paisaje de la zona de ${d.nombre}`} width="800" height="600" fetchpriority="high" />
+      {d.fotos.length > 1 && (
+        <div class="gallery-strip">
+          {d.fotos.slice(1).map((f) => <img src={url(f)} alt={`Otra vista de la zona de ${d.nombre}`} width="800" height="600" loading="lazy" decoding="async" />)}
+        </div>
+      )}
+      <div class="prose" style="margin-top:1.5rem"><Content /></div>
+    </div>
+    <aside>
+      <dl class="facts">
+        <div><dt>Sigla</dt><dd>{d.sigla}</dd></div>
+        <div><dt>Ubicación</dt><dd>{d.municipio}, {d.departamento}</dd></div>
+        <div><dt>Familias</dt><dd>{d.familias}</dd></div>
+        <div><dt>Capacidad</dt><dd>{d.capacidad}</dd></div>
+        <div><dt>Correo</dt><dd><a href={`mailto:${d.contacto.email}`}>{d.contacto.email}</a></dd></div>
+        <div><dt>WhatsApp</dt><dd>+{d.contacto.whatsapp}</dd></div>
+      </dl>
+      <WaButton text={msgOrganizacion(d.nombre)} number={d.contacto.whatsapp} label={`Escribir a ${d.sigla}`} />
+      {d.contacto.canales.length > 0 && (
+        <>
+          <h3 style="margin-top:1.5rem">Canales de venta</h3>
+          <ul class="tags">
+            {d.contacto.canales.map((c) => <li><a href={c.url} rel="noopener">{c.nombre}</a></li>)}
+          </ul>
+        </>
+      )}
+      <h3 style="margin-top:1.5rem">Ubicación</h3>
+      <MapView puntos={[{ nombre: d.nombre, lat: d.lat, lon: d.lon }]} center={[d.lat, d.lon]} zoom={9} size="mini" label={`Mapa de ${d.nombre}`} />
+    </aside>
+  </div>
+  {productos.length > 0 && (
+    <section class="block alt">
+      <div class="wrap">
+        <h2>Productos de {d.sigla}</h2>
+        <ul class="grid-cards">
+          {productos.map((p) => <ProductCard producto={p} org={org} />)}
+        </ul>
+      </div>
+    </section>
+  )}
+</Base>

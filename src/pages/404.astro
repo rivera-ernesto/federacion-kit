@@ -1,0 +1,17 @@
+---
+import Base from '../layouts/Base.astro';
+import { url } from '../lib/url';
+---
+<Base title="Página no encontrada" noindex>
+  <section class="block">
+    <div class="narrow" style="text-align:center">
+      <p class="eyebrow">Error 404</p>
+      <h1>No encontramos esta página</h1>
+      <p class="lead">Puede que el enlace haya cambiado. Prueba desde el inicio o el catálogo.</p>
+      <div class="actions" style="justify-content:center">
+        <a class="btn" href={url('/')}>Ir al inicio</a>
+        <a class="btn ghost" href={url('/catalogo/')}>Ver el catálogo</a>
+      </div>
+    </div>
+  </section>
+</Base>

@@ -1,0 +1,15 @@
+---
+import type { Org } from '../lib/data';
+import { url } from '../lib/url';
+interface Props { org: Org }
+const { org } = Astro.props;
+const d = org.data;
+---
+<li class="card" data-filter-item data-municipio={d.municipio}>
+  <img src={url(d.fotos[0] ?? '/media/hero.svg')} alt={`Paisaje de la zona de ${d.nombre}`} width="800" height="600" loading="lazy" decoding="async" />
+  <div class="body">
+    <h3><a href={url(`/directorio/${org.id}/`)}>{d.nombre}</a></h3>
+    <p>{d.descripcion}</p>
+    <p class="meta">{d.municipio}, {d.departamento} · {d.familias} familias</p>
+  </div>
+</li>

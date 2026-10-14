@@ -1,0 +1,53 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHead from '../components/PageHead.astro';
+import { siteConfig } from '../site.config';
+import { getOrgs } from '../lib/data';
+import { url } from '../lib/url';
+const orgs = await getOrgs();
+const familias = orgs.reduce((n, o) => n + o.data.familias, 0);
+const municipios = new Set(orgs.map((o) => o.data.municipio));
+---
+<Base title="La Federación" description={`Quiénes somos, objetivos, trayectoria y modelo Bosque en Pie de ${siteConfig.name}.`}>
+  <PageHead title="La Federación" lead="Asociaciones de productores que trabajan juntas para vivir del bosque en pie." />
+  <section class="block">
+    <div class="narrow prose">
+      <h2>Objetivos</h2>
+      <ul>
+        <li>Conseguir mejores mercados para los productos del bosque, con precios justos y pedidos planificados.</li>
+        <li>Mejorar la calidad y la inocuidad en cada etapa, desde la cosecha hasta el envase.</li>
+        <li>Fortalecer a las asociaciones con capacitación, equipos y trabajo en común.</li>
+        <li>Mantener el bosque en pie como fuente de ingreso para las familias.</li>
+      </ul>
+      <p>Hoy reunimos a <strong>{orgs.length} asociaciones</strong>, unas <strong>{familias} familias</strong> productoras en <strong>{municipios.size} municipios</strong>. <em>(Cifras de demostración.)</em></p>
+
+      <h2>Trayectoria</h2>
+      <ol class="timeline">
+        <li><b>Año 1.</b> Seis asociaciones se reúnen por primera vez y acuerdan vender de forma conjunta.</li>
+        <li><b>Año 2.</b> Se crea el centro de acopio compartido y se unifican los criterios de calidad.</li>
+        <li><b>Año 3.</b> Primeras ferias y primeros pedidos de compradores fuera de la región.</li>
+        <li><b>Año 4.</b> Se lanza este sitio para que cualquier comprador encuentre y consulte los productos.</li>
+      </ol>
+
+      <h2>Cobertura territorial</h2>
+      <p>Las asociaciones están repartidas por el norte de la Amazonía boliviana, en los departamentos de {[...new Set(orgs.map((o) => o.data.departamento))].join(' y ')}. Las comunidades están separadas por ríos y caminos de tierra, por eso trabajamos con puntos de acopio compartidos.</p>
+      <p><a href={url('/mapa/')}>Ver el mapa de asociaciones →</a></p>
+    </div>
+  </section>
+
+  <section class="block alt">
+    <div class="wrap">
+      <div class="narrow" style="margin-inline:0">
+        <p class="eyebrow">Nuestro modelo</p>
+        <h2>Bosque en Pie</h2>
+        <p class="lead">Producir desde el bosque en pie, sin talarlo.</p>
+        <p>En lugar de derribar árboles para sembrar, las familias recolectan y cuidan lo que el bosque ya da: asaí, majo, copoazú, cacao silvestre y castaña. Mientras el bosque siga de pie, la cosecha vuelve cada año.</p>
+      </div>
+      <ul class="pillars">
+        <li><b>Sin desmonte</b>Cada producto sale de árboles que ya existen o de sistemas que conviven con el bosque.</li>
+        <li><b>Ingreso para las familias</b>El bosque en pie vale más cuando quienes lo cuidan pueden vivir de él.</li>
+        <li><b>Origen trazable</b>Sabemos qué asociación y qué zona produjo cada lote, y lo mostramos.</li>
+      </ul>
+    </div>
+  </section>
+</Base>

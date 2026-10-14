@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+
+# Cambie la URL por la de su dominio (o use el sitemap generado en /sitemap-index.xml)
+Sitemap: https://example.org/sitemap-index.xml

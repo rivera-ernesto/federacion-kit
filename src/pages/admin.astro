@@ -1,0 +1,18 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHead from '../components/PageHead.astro';
+import { siteConfig } from '../site.config';
+---
+<Base title="Editar el sitio" description="Cómo entrar al panel de edición para actualizar productos, asociaciones y noticias." noindex>
+  <PageHead title="Editar el sitio" lead="Las personas autorizadas pueden cambiar textos, fotos, productos y noticias sin escribir código." />
+  <section class="block">
+    <div class="narrow">
+      <ol class="steps">
+        <li><strong>Abre el panel.</strong> Entra a <a href={siteConfig.adminUrl} rel="noopener">{siteConfig.adminUrl}</a>.</li>
+        <li><strong>Ingresa con tu cuenta de GitHub.</strong> Debes haber sido invitada o invitado al repositorio del sitio por quien lo administra. Si no tienes acceso, pídelo al equipo técnico.</li>
+        <li><strong>Edita y guarda.</strong> Elige Organizaciones, Productos, Noticias o Galería, cambia lo que necesites y pulsa Guardar. En unos minutos el sitio se actualiza solo.</li>
+      </ol>
+      <p class="note">Consejo: sube fotos livianas (menos de 300 KB) para que el sitio cargue rápido en conexiones lentas.</p>
+    </div>
+  </section>
+</Base>

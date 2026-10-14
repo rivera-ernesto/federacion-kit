@@ -1,0 +1,17 @@
+---
+import type { Noticia } from '../lib/data';
+import { tiposNoticia, fechaLarga } from '../lib/data';
+import { url } from '../lib/url';
+interface Props { noticia: Noticia }
+const { noticia } = Astro.props;
+const d = noticia.data;
+---
+<li class="card">
+  {d.foto && <img src={url(d.foto)} alt="" width="800" height="600" loading="lazy" decoding="async" />}
+  <div class="body">
+    <span class={`badge ${d.tipo}`}>{tiposNoticia[d.tipo]}</span>
+    <h3><a href={url(`/noticias/${noticia.id}/`)}>{d.titulo}</a></h3>
+    <p>{d.resumen}</p>
+    <p class="meta"><time datetime={d.fecha.toISOString().slice(0, 10)}>{fechaLarga(d.fecha)}</time></p>
+  </div>
+</li>

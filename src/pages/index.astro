@@ -1,0 +1,97 @@
+---
+import Base from '../layouts/Base.astro';
+import OrgCard from '../components/OrgCard.astro';
+import ProductCard from '../components/ProductCard.astro';
+import NewsCard from '../components/NewsCard.astro';
+import WaButton from '../components/WaButton.astro';
+import { siteConfig } from '../site.config';
+import { getOrgs, getProductos, getNoticias } from '../lib/data';
+import { url, absoluteUrl } from '../lib/url';
+import { msgGeneral } from '../lib/whatsapp';
+
+const [orgs, productos, noticias] = await Promise.all([getOrgs(), getProductos(), getNoticias()]);
+const orgById = new Map(orgs.map((o) => [o.id, o]));
+const destacados = productos.filter((p) => p.data.disponibilidad === 'disponible').slice(0, 4);
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: siteConfig.name,
+  alternateName: siteConfig.shortName,
+  url: absoluteUrl('/'),
+  description: siteConfig.description,
+  logo: absoluteUrl('/favicon.svg'),
+  email: siteConfig.email,
+  telephone: `+${siteConfig.whatsapp}`,
+  sameAs: Object.values(siteConfig.social).filter(Boolean),
+  member: orgs.map((o) => ({ '@type': 'Organization', name: o.data.nombre, url: absoluteUrl(`/directorio/${o.id}/`) })),
+};
+---
+<Base title={siteConfig.shortName} description={siteConfig.description} jsonLd={jsonLd}>
+  <section class="hero">
+    <div class="wrap grid">
+      <div>
+        <p class="eyebrow">Amazonía norte de Bolivia</p>
+        <h1>{siteConfig.tagline}</h1>
+        <p class="lead">Somos una federación de {orgs.length} asociaciones de productores que viven del bosque sin talarlo: pulpas de fruta, cacao silvestre, harinas y castaña, listos para tu negocio o tu mesa.</p>
+        <div class="actions">
+          <a class="btn" href={url('/catalogo/')}>Ver el catálogo</a>
+          <WaButton text={msgGeneral()} label="Consultar por WhatsApp" />
+        </div>
+      </div>
+      <img src={url('/media/hero.svg')} alt="Ilustración de un río amazónico con árboles al atardecer" width="800" height="600" fetchpriority="high" />
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="wrap">
+      <div class="narrow" style="margin-inline:0">
+        <h2>Qué es la federación</h2>
+        <p>Reunimos a familias productoras de la Amazonía que se organizaron para vender juntas, mejorar la calidad y cuidar el bosque donde viven. Cada asociación conserva su identidad; la federación les da escala, mercado y voz común.</p>
+        <p><a href={url('/la-federacion/')}>Conocer la federación →</a></p>
+      </div>
+    </div>
+  </section>
+
+  <section class="block alt">
+    <div class="wrap">
+      <h2>Productos destacados</h2>
+      <ul class="grid-cards">
+        {destacados.map((p) => <ProductCard producto={p} org={orgById.get(p.data.organizacion)!} />)}
+      </ul>
+      <p style="margin-top:1.5rem"><a class="btn ghost" href={url('/catalogo/')}>Ver todo el catálogo</a></p>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="wrap">
+      <h2>Nuestras asociaciones</h2>
+      <ul class="grid-cards">
+        {orgs.slice(0, 3).map((o) => <OrgCard org={o} />)}
+      </ul>
+      <p style="margin-top:1.5rem"><a class="btn ghost" href={url('/directorio/')}>Ver las {orgs.length} asociaciones</a> <a href={url('/mapa/')} style="margin-left:1rem">Ver en el mapa</a></p>
+    </div>
+  </section>
+
+  <section class="block alt">
+    <div class="wrap">
+      <h2>Últimas noticias</h2>
+      <ul class="grid-cards">
+        {noticias.slice(0, 3).map((n) => <NewsCard noticia={n} />)}
+      </ul>
+      <p style="margin-top:1.5rem"><a href={url('/noticias/')}>Todas las noticias →</a></p>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="wrap">
+      <div class="cta">
+        <h2>¿Quieres comprar o conocer más?</h2>
+        <p>Cuéntanos qué buscas y te conectamos con la asociación que lo produce. Armar una lista de consulta toma un minuto y no requiere pagar nada.</p>
+        <div class="actions" style="margin:0">
+          <WaButton text={msgGeneral()} label="Escribir por WhatsApp" />
+          <a class="btn ghost" style="color:#fff;border-color:#fff" href={url('/mi-lista/')}>Mi lista de consulta</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</Base>
