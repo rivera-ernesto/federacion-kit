@@ -2,6 +2,7 @@
 import '../styles/global.css';
 import { siteConfig } from '../site.config';
 import { url, absoluteUrl } from '../lib/url';
+import { waUrl, msgGeneral } from '../lib/whatsapp';
 
 interface Props {
   title: string;
@@ -85,7 +86,7 @@ const c = siteConfig.colors;
           <div>
             <h2>Escríbenos</h2>
             <ul>
-              <li><a href={`https://wa.me/${siteConfig.whatsapp}`}>WhatsApp: +{siteConfig.whatsapp}</a></li>
+              <li><a href={waUrl(siteConfig.whatsapp, msgGeneral())}>WhatsApp: +{siteConfig.whatsapp}</a></li>
               <li><a href={`mailto:${siteConfig.email}`}>{siteConfig.email}</a></li>
               {siteConfig.social.facebook && <li><a href={siteConfig.social.facebook} rel="noopener">Facebook</a></li>}
               {siteConfig.social.instagram && <li><a href={siteConfig.social.instagram} rel="noopener">Instagram</a></li>}

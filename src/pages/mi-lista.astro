@@ -18,13 +18,15 @@ import { url } from '../lib/url';
           <div class="field"><label for="p-nombre">Tu nombre</label><input id="p-nombre" autocomplete="name" /></div>
           <div class="field"><label for="p-ciudad">Ciudad de entrega</label><input id="p-ciudad" autocomplete="address-level2" /></div>
         </fieldset>
+        <p class="sr-only" role="status" aria-live="polite" id="lista-live"></p>
         <div id="grupos"></div>
         <button type="button" class="btn ghost sm" id="vaciar">Vaciar la lista</button>
       </div>
     </div>
   </section>
   <script>
-    import { getLista, setLista, quitar, getPerfil, setPerfil } from '../scripts/lista';
+    import { waUrl } from '../lib/whatsapp';
+    import { getLista, setLista, actualizar, quitarLinea, claveDe, clamp, textoNota, UNIDAD, getPerfil, setPerfil } from '../scripts/lista';
     const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
     const nombre = $<HTMLInputElement>('p-nombre'), ciudad = $<HTMLInputElement>('p-ciudad');
     const perfil = getPerfil();
@@ -34,7 +36,7 @@ import { url } from '../lib/url';
 
     const mensaje = (orgNombre: string, items: ReturnType<typeof getLista>) => {
       const quien = nombre.value.trim() ? `Hola, soy ${nombre.value.trim()}${ciudad.value.trim() ? ` de ${ciudad.value.trim()}` : ''}.` : 'Hola.';
-      const lineas = items.map((i) => `- ${i.nombre}${i.nota.trim() ? ` (${i.nota.trim()})` : ''}`).join('\n');
+      const lineas = items.map((i) => `- ${i.nombre}${textoNota(i).trim() ? ` (${textoNota(i).trim()})` : ''}`).join('\n');
       return `${quien} Quisiera consultar disponibilidad y condiciones de estos productos de ${orgNombre}:\n${lineas}\n\nGracias.`;
     };
 
@@ -58,19 +60,54 @@ import { url } from '../lib/url';
           row.className = 'lista-item';
           const a = document.createElement('a');
           a.className = 'name'; a.href = it.href; a.textContent = it.nombre;
-          const input = document.createElement('input');
-          input.setAttribute('aria-label', `Cantidad o nota para ${it.nombre}`);
-          input.placeholder = 'Cantidad o nota (ej. 20 kg)';
-          input.value = it.nota;
-          input.addEventListener('input', () => {
-            setLista(getLista().map((x) => (x.slug === it.slug ? { ...x, nota: input.value } : x)));
-            updateLink();
-          });
+          const clave = claveDe(it);
+          const cambiar = (c: { cantidad?: number; presentacion?: string }, aviso: string) => {
+            actualizar(clave, c); $('lista-live').textContent = `${it.nombre}: ${aviso}`; render();
+            document.querySelector<HTMLElement>(`[data-clave="${CSS.escape(claveDe({ ...it, ...c }))}"] ${c.cantidad !== undefined ? '[data-mas]' : '[data-pres]'}`)?.focus();
+          };
+          const cant = it.cantidad;
+          const controls = document.createElement('div');
+          controls.className = 'controls';
+          row.dataset.clave = clave;
+          if (cant !== undefined) {
+            const q = document.createElement('div');
+            q.className = 'qty'; q.setAttribute('role', 'group'); q.setAttribute('aria-label', `Cantidad de ${it.nombre}`);
+            const mk = (txt: string, label: string, d: number, attr: string) => {
+              const b = document.createElement('button');
+              b.type = 'button'; b.textContent = txt; b.setAttribute('aria-label', label); b.setAttribute(attr, '');
+              b.addEventListener('click', () => { const n = clamp(cant + d); if (n !== cant) cambiar({ cantidad: n }, `${n} × ${it.presentacion || UNIDAD}.`); });
+              return b;
+            };
+            const out = document.createElement('output');
+            out.textContent = String(cant); out.className = 'qty-out';
+            q.append(mk('−', `Menos ${it.nombre}`, -1, 'data-menos'), out, mk('+', `Más ${it.nombre}`, 1, 'data-mas'));
+            controls.append(q);
+            const sel = document.createElement('select');
+            sel.className = 'pres'; sel.setAttribute('data-pres', ''); sel.setAttribute('aria-label', `Presentación de ${it.nombre}`);
+            const opts = it.presentaciones?.length ? it.presentaciones : [it.presentacion ?? ''];
+            if (it.presentacion && !opts.includes(it.presentacion)) opts.push(it.presentacion);
+            opts.forEach((p) => sel.add(new Option(p || UNIDAD, p)));
+            sel.value = it.presentacion ?? '';
+            sel.addEventListener('change', () => cambiar({ presentacion: sel.value || undefined }, `presentación ${sel.value || UNIDAD}.`));
+            controls.append(sel);
+          } else {
+            // Nota libre de una versión anterior: se conserva y se puede editar.
+            const input = document.createElement('input');
+            input.setAttribute('aria-label', `Cantidad o nota para ${it.nombre}`);
+            input.placeholder = 'Cantidad o nota (ej. 20 kg)';
+            input.value = it.nota;
+            input.addEventListener('input', () => {
+              setLista(getLista().map((x) => (claveDe(x) === clave ? { ...x, nota: input.value } : x)));
+              updateLink();
+            });
+            controls.append(input);
+          }
           const rm = document.createElement('button');
           rm.type = 'button'; rm.className = 'btn ghost sm'; rm.textContent = 'Quitar';
-          rm.setAttribute('aria-label', `Quitar ${it.nombre} de la lista`);
-          rm.addEventListener('click', () => { quitar(it.slug); render(); });
-          row.append(a, input, rm);
+          rm.setAttribute('aria-label', `Quitar ${it.nombre}${it.presentacion ? ` (${it.presentacion})` : ''} de la lista`);
+          rm.addEventListener('click', () => { quitarLinea(clave); $('lista-live').textContent = `${it.nombre} quitado de la lista.`; render(); $('grupos').querySelector<HTMLElement>('a.name, .btn.wa')?.focus(); });
+          controls.append(rm);
+          row.append(a, controls);
           sec.append(row);
         });
         const wa = document.createElement('a');
@@ -78,7 +115,7 @@ import { url } from '../lib/url';
         wa.textContent = `Enviar consulta a ${items[0].orgNombre} por WhatsApp`;
         const updateLink = () => {
           const fresh = getLista().filter((x) => x.orgId === items[0].orgId);
-          wa.href = `https://wa.me/${items[0].orgWa}?text=${encodeURIComponent(mensaje(items[0].orgNombre, fresh))}`;
+          wa.href = waUrl(items[0].orgWa, mensaje(items[0].orgNombre, fresh));
         };
         updateLink();
         nombre.addEventListener('input', updateLink); ciudad.addEventListener('input', updateLink);
