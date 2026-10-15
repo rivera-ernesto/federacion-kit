@@ -25,6 +25,7 @@ import { url } from '../lib/url';
     </div>
   </section>
   <script>
+    import { waUrl } from '../lib/whatsapp';
     import { getLista, setLista, actualizar, quitarLinea, claveDe, clamp, textoNota, UNIDAD, getPerfil, setPerfil } from '../scripts/lista';
     const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
     const nombre = $<HTMLInputElement>('p-nombre'), ciudad = $<HTMLInputElement>('p-ciudad');
@@ -114,7 +115,7 @@ import { url } from '../lib/url';
         wa.textContent = `Enviar consulta a ${items[0].orgNombre} por WhatsApp`;
         const updateLink = () => {
           const fresh = getLista().filter((x) => x.orgId === items[0].orgId);
-          wa.href = `https://wa.me/${items[0].orgWa}?text=${encodeURIComponent(mensaje(items[0].orgNombre, fresh))}`;
+          wa.href = waUrl(items[0].orgWa, mensaje(items[0].orgNombre, fresh));
         };
         updateLink();
         nombre.addEventListener('input', updateLink); ciudad.addEventListener('input', updateLink);

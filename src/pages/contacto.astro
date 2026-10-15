@@ -3,7 +3,7 @@ import Base from '../layouts/Base.astro';
 import PageHead from '../components/PageHead.astro';
 import WaButton from '../components/WaButton.astro';
 import { siteConfig } from '../site.config';
-import { msgGeneral } from '../lib/whatsapp';
+import { msgGeneral, waUrl } from '../lib/whatsapp';
 const endpoint = siteConfig.formEndpoint.trim();
 ---
 <Base title="Contacto" description={`Escríbenos por WhatsApp o correo: ${siteConfig.name}.`}>
@@ -14,7 +14,7 @@ const endpoint = siteConfig.formEndpoint.trim();
         <h2>Escríbenos</h2>
         <div class="actions"><WaButton text={msgGeneral()} label="Escribir por WhatsApp" /></div>
         <ul class="clean">
-          <li>WhatsApp: <a href={`https://wa.me/${siteConfig.whatsapp}`}>+{siteConfig.whatsapp}</a></li>
+          <li>WhatsApp: <a href={waUrl(siteConfig.whatsapp, msgGeneral())}>+{siteConfig.whatsapp}</a></li>
           <li>Correo: <a href={`mailto:${siteConfig.email}`}>{siteConfig.email}</a></li>
           <li>{siteConfig.address}</li>
         </ul>
@@ -44,6 +44,7 @@ const endpoint = siteConfig.formEndpoint.trim();
     </div>
   </section>
   <script>
+    import { waUrl } from '../lib/whatsapp';
     const form = document.getElementById('consulta') as HTMLFormElement;
     if (!form.dataset.endpoint) {
       form.addEventListener('submit', (e) => {
@@ -53,7 +54,7 @@ const endpoint = siteConfig.formEndpoint.trim();
         const canal = (e as SubmitEvent).submitter?.getAttribute('value');
         window.location.href = canal === 'mail'
           ? `mailto:${form.dataset.email}?subject=${encodeURIComponent('Consulta desde el sitio web')}&body=${encodeURIComponent(texto)}`
-          : `https://wa.me/${form.dataset.wa}?text=${encodeURIComponent(texto)}`;
+          : waUrl(form.dataset.wa || '', texto);
       });
     }
   </script>

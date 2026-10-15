@@ -45,7 +45,10 @@ export const siteConfig = {
     asai: '#4b2a5c',
   },
 
-  demoNotice: 'Sitio de demostración: nombres y datos inventados.',
+  demoNotice: 'Sitio de demostración: nombres y datos inventados. WhatsApp se abre con el mensaje ya escrito y usted elige a quién enviarlo.',
+  // En la demostración no hay números reales: WhatsApp se abre sin destinatario.
+  // En el sitio real, poner false y usar los números de cada asociación.
+  whatsappSinNumero: true,
 };
 
 export type SiteConfig = typeof siteConfig;
