@@ -37,6 +37,12 @@ export function agregar(item: ItemLista) {
   const l = getLista();
   if (!l.some((i) => i.slug === item.slug)) setLista([...l, item]);
 }
+/** Agrega el producto o, si ya está, solo actualiza su nota (cantidad). */
+export function agregarOActualizar(item: ItemLista) {
+  const l = getLista();
+  if (l.some((i) => i.slug === item.slug)) setLista(l.map((i) => (i.slug === item.slug ? { ...i, nota: item.nota } : i)));
+  else setLista([...l, item]);
+}
 export const quitar = (slug: string) => setLista(getLista().filter((i) => i.slug !== slug));
 export const getPerfil = () => read<Perfil>(PERFIL, { nombre: '', ciudad: '' });
 export const setPerfil = (p: Perfil) => write(PERFIL, p);

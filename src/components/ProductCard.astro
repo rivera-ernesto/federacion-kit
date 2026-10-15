@@ -6,11 +6,30 @@ interface Props { producto: Producto; org: Org }
 const { producto, org } = Astro.props;
 const d = producto.data;
 ---
-<li class="card" data-filter-item data-categoria={d.categoria} data-disponibilidad={d.disponibilidad}>
+<li
+  class="card"
+  data-filter-item
+  data-categoria={d.categoria}
+  data-disponibilidad={d.disponibilidad}
+  data-slug={producto.id}
+  data-nombre={d.nombre}
+  data-href={url(`/catalogo/${producto.id}/`)}
+  data-org-id={org.id}
+  data-org-nombre={org.data.nombre}
+  data-org-wa={org.data.contacto.whatsapp}
+>
   <img src={url(d.foto ?? '/media/hero.svg')} alt={d.nombre} width="800" height="600" loading="lazy" decoding="async" />
   <div class="body">
     <span class={`badge ${d.disponibilidad}`}>{disponibilidades[d.disponibilidad]}</span>
     <h3><a href={url(`/catalogo/${producto.id}/`)}>{d.nombre}</a></h3>
-    <p class="meta">{categorias[d.categoria]} · {org.data.nombre}</p>
+    <p class="meta"><span class="cat">{categorias[d.categoria]} · </span>{org.data.nombre}</p>
+    <div class="quick" data-quick hidden>
+      <div class="qty" role="group" aria-label={`Cantidad de ${d.nombre}`}>
+        <button type="button" data-qty-minus aria-label={`Menos ${d.nombre}`}>−</button>
+        <input type="number" inputmode="numeric" min="1" max="9999" step="1" value="1" data-qty-input aria-label={`Cantidad de ${d.nombre}`} />
+        <button type="button" data-qty-plus aria-label={`Más ${d.nombre}`}>+</button>
+      </div>
+      <button type="button" class="btn sm" data-quick-add aria-label={`Agregar ${d.nombre} a mi lista de consulta`}>Agregar</button>
+    </div>
   </div>
 </li>

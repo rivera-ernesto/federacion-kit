@@ -26,12 +26,21 @@ const orgById = new Map(orgs.map((o) => [o.id, o]));
           </select>
         </div>
       </form>
-      <p class="status" data-filter-status aria-live="polite"></p>
-      <ul class="grid-cards">
+      <div class="results-bar">
+        <p class="status" data-filter-status aria-live="polite"></p>
+        <div class="view-toggle" data-view-toggle role="group" aria-label="Tipo de vista" hidden>
+          <button type="button" data-view="iconos" aria-pressed="true">Íconos</button>
+          <button type="button" data-view="lista" aria-pressed="false">Lista</button>
+        </div>
+      </div>
+      <p class="sr-only" role="status" aria-live="polite" data-quick-live></p>
+      <ul class="grid-cards" data-results data-view="iconos">
         {productos.map((p) => <ProductCard producto={p} org={orgById.get(p.data.organizacion)!} />)}
       </ul>
       <p class="empty" data-filter-empty hidden>No hay productos con esos filtros. Prueba con otra combinación.</p>
     </div>
   </section>
-  <script>import '../../scripts/filters';</script>
+  <script>import '../../scripts/filters';
+    import '../../scripts/catalogo';
+  </script>
 </Base>
