@@ -17,6 +17,7 @@ const d = producto.data;
   data-org-id={org.id}
   data-org-nombre={org.data.nombre}
   data-org-wa={org.data.contacto.whatsapp}
+  data-presentaciones={JSON.stringify(d.presentaciones)}
 >
   <img src={url(d.foto ?? '/media/hero.svg')} alt={d.nombre} width="800" height="600" loading="lazy" decoding="async" />
   <div class="body">
@@ -29,6 +30,9 @@ const d = producto.data;
         <input type="number" inputmode="numeric" min="1" max="9999" step="1" value="1" data-qty-input aria-label={`Cantidad de ${d.nombre}`} />
         <button type="button" data-qty-plus aria-label={`Más ${d.nombre}`}>+</button>
       </div>
+      <select class="pres" data-pres aria-label={`Presentación de ${d.nombre}`}>
+        {d.presentaciones.length ? d.presentaciones.map((p) => <option value={p}>{p}</option>) : <option value="">unidad</option>}
+      </select>
       <button type="button" class="btn sm" data-quick-add aria-label={`Agregar ${d.nombre} a mi lista de consulta`}>Agregar</button>
     </div>
   </div>

@@ -1,5 +1,5 @@
 // Catálogo: cambio de vista (íconos / lista) y agregado rápido a la lista de consulta.
-import { agregarOActualizar, getLista } from './lista';
+import { agregarOActualizar, clamp, textoNota, UNIDAD } from './lista';
 
 const VIEW_KEY = 'fepa:vista';
 const results = document.querySelector<HTMLElement>('[data-results]');
@@ -24,13 +24,12 @@ if (results && toggle) {
 
 // --- Agregado rápido ---
 const live = document.querySelector<HTMLElement>('[data-quick-live]');
-const clamp = (n: number) => (Number.isFinite(n) ? Math.min(9999, Math.max(1, Math.floor(n))) : 1);
-const NOTA = /^Cantidad: \d+$/;
 
 document.querySelectorAll<HTMLElement>('[data-filter-item]').forEach((card) => {
   const quick = card.querySelector<HTMLElement>('[data-quick]');
   if (!quick) return;
   const input = quick.querySelector<HTMLInputElement>('[data-qty-input]')!;
+  const pres = quick.querySelector<HTMLSelectElement>('[data-pres]')!;
   const add = quick.querySelector<HTMLButtonElement>('[data-quick-add]')!;
   const step = (d: number) => { input.value = String(clamp((parseInt(input.value, 10) || 1) + d)); };
   quick.querySelector('[data-qty-minus]')!.addEventListener('click', () => step(-1));
@@ -41,14 +40,14 @@ document.querySelectorAll<HTMLElement>('[data-filter-item]').forEach((card) => {
     const qty = clamp(parseInt(input.value, 10));
     input.value = String(qty);
     const d = card.dataset;
-    const previa = getLista().find((i) => i.slug === d.slug)?.nota.trim() ?? '';
-    // Conserva una nota escrita a mano; solo reemplaza una cantidad puesta desde el catálogo.
-    const nota = !previa || NOTA.test(previa) ? `Cantidad: ${qty}` : `Cantidad: ${qty} · ${previa.replace(/^Cantidad: \d+ · /, '')}`;
-    agregarOActualizar({ slug: d.slug!, nombre: d.nombre!, href: d.href!, orgId: d.orgId!, orgNombre: d.orgNombre!, orgWa: d.orgWa!, nota });
+    const presentacion = pres.value || undefined;
+    const item = { slug: d.slug!, nombre: d.nombre!, href: d.href!, orgId: d.orgId!, orgNombre: d.orgNombre!, orgWa: d.orgWa!, nota: '', cantidad: qty, presentacion, presentaciones: JSON.parse(d.presentaciones || '[]') as string[] };
+    item.nota = textoNota(item);
+    agregarOActualizar(item);
     const label = add.textContent;
     if (!add.dataset.label) add.dataset.label = label ?? 'Agregar';
     add.textContent = 'Agregado ✓';
-    if (live) live.textContent = `${d.nombre}: ${qty} en tu lista de consulta.`;
+    if (live) live.textContent = `${d.nombre}: ${qty} × ${presentacion ?? UNIDAD} en tu lista de consulta.`;
     clearTimeout(timer);
     timer = window.setTimeout(() => { add.textContent = add.dataset.label!; }, 2000);
   });

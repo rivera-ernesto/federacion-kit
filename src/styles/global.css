@@ -174,7 +174,8 @@ ul.clean { list-style: none; padding: 0; margin: 0; }
 /* lista */
 .lista-group { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 1.1rem; margin-bottom: 1.25rem; box-shadow: var(--shadow); }
 .lista-item { display: grid; gap: .5rem; grid-template-columns: 1fr; padding: .8rem 0; border-top: 1px solid var(--line); }
-@media (min-width: 640px) { .lista-item { grid-template-columns: 1fr 220px auto; align-items: center; } }
+@media (min-width: 640px) { .lista-item { grid-template-columns: minmax(0, 1fr) auto; align-items: center; } }
+.lista-item .controls { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; min-width: 0; }
 .lista-item .name { font-weight: 600; }
 .form-grid { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); margin-bottom: 1.25rem; }
 .note { font-size: .92rem; color: var(--muted); }
@@ -204,8 +205,11 @@ ul.clean { list-style: none; padding: 0; margin: 0; }
 .qty button:hover { background: var(--line); }
 .qty input { width: 3.4rem; min-width: 0; border: 0; border-radius: 0; text-align: center; padding: .4rem .2rem; -moz-appearance: textfield; appearance: textfield; }
 .qty input::-webkit-outer-spin-button, .qty input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.qty output { display: inline-flex; align-items: center; justify-content: center; min-width: 2.6rem; padding: 0 .3rem; font-weight: 600; }
 .qty input:focus { outline-offset: -3px; }
 .quick .btn.sm { min-height: 40px; }
+.pres { min-height: 40px; max-width: 100%; min-width: 0; flex: 1 1 8rem; padding: .3rem .5rem; border: 1px solid #b9ad92; border-radius: 8px; background: #fff; font: inherit; font-size: .9rem; }
+.lista-item .pres { flex: 0 1 12rem; }
 
 /* vista de lista (compacta) */
 .grid-cards[data-view="lista"] { grid-template-columns: 1fr; gap: .6rem; }
@@ -223,4 +227,5 @@ ul.clean { list-style: none; padding: 0; margin: 0; }
   [data-view="lista"] .card .body .meta { grid-area: m; }
   [data-view="lista"] .card .body .badge { grid-area: b; align-self: center; }
   [data-view="lista"] .card .body .quick { grid-area: q; margin: 0; flex-wrap: nowrap; }
+  [data-view="lista"] .quick .pres { flex: 0 1 11rem; }
 }
