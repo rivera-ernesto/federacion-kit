@@ -6,8 +6,9 @@ import WaButton from '../../components/WaButton.astro';
 import MapView from '../../components/MapView.astro';
 import { render } from 'astro:content';
 import { getOrgs, getProductos } from '../../lib/data';
-import { url } from '../../lib/url';
+import { url, directionsUrl } from '../../lib/url';
 import { msgOrganizacion } from '../../lib/whatsapp';
+import { siteConfig } from '../../site.config';
 
 export async function getStaticPaths() {
   const orgs = await getOrgs();
@@ -39,7 +40,11 @@ const productos = (await getProductos()).filter((p) => p.data.organizacion === o
         <div><dt>Correo</dt><dd><a href={`mailto:${d.contacto.email}`}>{d.contacto.email}</a></dd></div>
         <div><dt>WhatsApp</dt><dd>+{d.contacto.whatsapp}</dd></div>
       </dl>
-      <WaButton text={msgOrganizacion(d.nombre)} number={d.contacto.whatsapp} label={`Escribir a ${d.sigla}`} />
+      <div class="actions">
+        <WaButton text={msgOrganizacion(d.nombre)} number={d.contacto.whatsapp} label={`Escribir a ${d.sigla}`} />
+        {/* Llamar: solo en un sitio con números reales; la demostración no los tiene. */}
+        {!siteConfig.whatsappSinNumero && <a class="btn ghost" href={`tel:+${d.contacto.whatsapp}`}>Llamar a {d.sigla}</a>}
+      </div>
       {d.contacto.canales.length > 0 && (
         <>
           <h3 style="margin-top:1.5rem">Canales de venta</h3>
@@ -50,6 +55,7 @@ const productos = (await getProductos()).filter((p) => p.data.organizacion === o
       )}
       <h3 style="margin-top:1.5rem">Ubicación</h3>
       <MapView puntos={[{ nombre: d.nombre, lat: d.lat, lon: d.lon }]} center={[d.lat, d.lon]} zoom={9} size="mini" label={`Mapa de ${d.nombre}`} />
+      <p class="actions"><a class="btn ghost sm" href={directionsUrl(d.lat, d.lon)} rel="noopener noreferrer">Cómo llegar a {d.sigla}</a></p>
     </aside>
   </div>
   {productos.length > 0 && (

@@ -12,7 +12,10 @@ interface Props {
   jsonLd?: Record<string, unknown>;
   noindex?: boolean;
 }
-const { title, description = siteConfig.description, image = '/media/og-default.png', ogType = 'website', jsonLd, noindex = false } = Astro.props;
+const { title, description = siteConfig.description, image, ogType = 'website', jsonLd, noindex = false } = Astro.props;
+// Las redes no muestran SVG al compartir: solo fotos (jpg, png, webp); si no hay, la imagen del sitio.
+const OG_DEFAULT = '/media/og.png';
+const ogImage = image && /\.(jpe?g|png|webp)$/i.test(image) ? image : OG_DEFAULT;
 
 const fullTitle = title === siteConfig.shortName ? `${siteConfig.name}` : `${title} · ${siteConfig.shortName}`;
 const canonical = new URL(Astro.url.pathname, Astro.site).href;
@@ -32,6 +35,11 @@ const isCurrent = (href: string) => {
   return href === '/' ? current === u : current.startsWith(u);
 };
 const c = siteConfig.colors;
+const d = siteConfig.colorsDark;
+const darkVars = `--forest:${d.forest};--forest-dark:${d.forestDark};--cream:${d.cream};--asai:${d.asai};--link:${d.link};--heading:${d.heading};--accent:${d.accent}`;
+const themeCss = `:root{--forest:${c.forest};--forest-dark:${c.forestDark};--earth:${c.earth};--cream:${c.cream};--asai:${c.asai}}`
+  + `:root[data-theme="dark"]{${darkVars}}`
+  + `@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){${darkVars}}}`;
 ---
 <!doctype html>
 <html lang={siteConfig.lang}>
@@ -40,20 +48,30 @@ const c = siteConfig.colors;
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{fullTitle}</title>
     <meta name="description" content={description} />
-    <link rel="canonical" href={canonical} />
-    {noindex && <meta name="robots" content="noindex" />}
-    <meta name="theme-color" content={c.forest} />
+    {noindex ? <meta name="robots" content="noindex" /> : <link rel="canonical" href={canonical} />}
+    <meta name="theme-color" content={c.forest} media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content={d.forestDark} media="(prefers-color-scheme: dark)" />
     <link rel="icon" href={url('/favicon.svg')} type="image/svg+xml" />
     <meta property="og:type" content={ogType} />
     <meta property="og:title" content={fullTitle} />
     <meta property="og:description" content={description} />
-    <meta property="og:url" content={canonical} />
+    {!noindex && <meta property="og:url" content={canonical} />}
     <meta property="og:site_name" content={siteConfig.name} />
     <meta property="og:locale" content={siteConfig.locale.replace('-', '_')} />
-    <meta property="og:image" content={absoluteUrl(image)} />
+    <meta property="og:image" content={absoluteUrl(ogImage)} />
+    {ogImage === OG_DEFAULT && <><meta property="og:image:width" content="1200" /><meta property="og:image:height" content="630" /></>}
+    <meta property="og:image:alt" content={ogImage === OG_DEFAULT ? `${siteConfig.name}: ${siteConfig.tagline}` : title} />
     <meta name="twitter:card" content="summary_large_image" />
-    <style is:inline set:html={`:root{--forest:${c.forest};--forest-dark:${c.forestDark};--earth:${c.earth};--cream:${c.cream};--asai:${c.asai}}`}></style>
-    <script is:inline>document.documentElement.classList.add('js')</script>
+    <meta name="twitter:image" content={absoluteUrl(ogImage)} />
+    <style is:inline set:html={themeCss}></style>
+    <script is:inline>
+      // Antes de pintar: marca que hay JavaScript y aplica el tema elegido; si no hay, manda el sistema.
+      document.documentElement.classList.add('js');
+      try {
+        const t = localStorage.getItem('fepa:tema');
+        if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t;
+      } catch (e) {}
+    </script>
     {jsonLd && <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />}
     <slot name="head" />
   </head>
@@ -62,11 +80,19 @@ const c = siteConfig.colors;
     <div class="demo" role="note">{siteConfig.demoNotice}</div>
     <header class="site-header">
       <div class="wrap bar">
-        <a class="brand" href={url('/')} aria-label={`${siteConfig.name}, inicio`}>
+        <a class="brand" href={url('/')} aria-label={`${siteConfig.shortName}, ${siteConfig.name}: inicio`}>
           <svg width="34" height="34" viewBox="0 0 34 34" aria-hidden="true"><circle cx="17" cy="17" r="17" fill="var(--forest)"/><path d="M9 22c0-8 6-12 16-13-1 9-5 15-13 14" fill="#8bb58a"/><path d="M10 25c4-6 8-9 13-12" stroke="#f7f1e3" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg>
           <span>{siteConfig.shortName}<small>{siteConfig.name}</small></span>
         </a>
-        <button class="menu-btn" type="button" aria-expanded="false" aria-controls="menu">Menú</button>
+        <div class="bar-tools">
+          <button class="theme-toggle" type="button" aria-pressed="false" aria-label="Modo oscuro" title="Modo oscuro">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path class="sun" d="M12 4V2m0 20v-2m8-8h2M2 12h2m13.66-5.66 1.41-1.41M4.93 19.07l1.41-1.41m0-11.32L4.93 4.93m14.14 14.14-1.41-1.41M12 17a5 5 0 1 0 0-10 5 5 0 0 0 0 10Z" />
+              <path class="moon" d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z" />
+            </svg>
+          </button>
+          <button class="menu-btn" type="button" aria-expanded="false" aria-controls="menu">Menú</button>
+        </div>
         <nav class="nav" id="menu" aria-label="Principal">
           {nav.map(([label, href]) => <a href={url(href)} aria-current={isCurrent(href) ? 'page' : undefined}>{label}</a>)}
           <a class="lista-link" href={url('/mi-lista/')} aria-current={isCurrent('/mi-lista/') ? 'page' : undefined}>Mi lista<span class="count" data-lista-count data-n="0" aria-label="productos en la lista">0</span></a>

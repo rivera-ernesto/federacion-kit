@@ -1,22 +1,24 @@
 ---
 // Mapa Leaflet + OpenStreetMap. Leaflet solo se carga en las páginas que usan este componente.
 import { siteConfig } from '../site.config';
+import { directionsUrl } from '../lib/url';
 export interface Punto { nombre: string; lat: number; lon: number; href?: string; detalle?: string }
 interface Props { puntos: Punto[]; zoom?: number; center?: [number, number]; size?: 'mini' | 'tall' | 'normal'; label: string }
-const { puntos, zoom = siteConfig.map.zoom, center = siteConfig.map.center, size = 'normal', label } = Astro.props;
+const { puntos: base, zoom = siteConfig.map.zoom, center = siteConfig.map.center, size = 'normal', label } = Astro.props;
+const puntos = base.map((p) => ({ ...p, ruta: directionsUrl(p.lat, p.lon) }));
 ---
 <div class={`map ${size === 'normal' ? '' : size}`} id={`map-${size}`} role="region" aria-label={label}
   data-puntos={JSON.stringify(puntos)} data-zoom={zoom} data-center={JSON.stringify(center)}>
   <p class="empty">El mapa necesita JavaScript. Mientras tanto, estas son las ubicaciones:</p>
 </div>
 <ul class="map-fallback">
-  {puntos.map((p) => <li>{p.href ? <a href={p.href}>{p.nombre}</a> : p.nombre}{p.detalle ? ` · ${p.detalle}` : ''} ({p.lat.toFixed(2)}, {p.lon.toFixed(2)})</li>)}
+  {puntos.map((p) => <li>{p.href ? <a href={p.href}>{p.nombre}</a> : p.nombre}{p.detalle ? ` · ${p.detalle}` : ''} ({p.lat.toFixed(2)}, {p.lon.toFixed(2)}) · <a href={p.ruta} rel="noopener noreferrer">Cómo llegar</a></li>)}
 </ul>
 <script>
   import L from 'leaflet';
   import 'leaflet/dist/leaflet.css';
   const el = document.querySelector<HTMLElement>('.map[data-puntos]')!;
-  const puntos: { nombre: string; lat: number; lon: number; href?: string; detalle?: string }[] = JSON.parse(el.dataset.puntos!);
+  const puntos: { nombre: string; lat: number; lon: number; href?: string; detalle?: string; ruta: string }[] = JSON.parse(el.dataset.puntos!);
   el.textContent = '';
   document.querySelector('.map-fallback')?.setAttribute('hidden', '');
   const map = L.map(el, { scrollWheelZoom: false }).setView(JSON.parse(el.dataset.center!), Number(el.dataset.zoom));
@@ -28,7 +30,7 @@ const { puntos, zoom = siteConfig.map.zoom, center = siteConfig.map.center, size
   const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]!);
   const bounds: [number, number][] = [];
   for (const p of puntos) {
-    const html = `<strong>${p.href ? `<a href="${esc(p.href)}">${esc(p.nombre)}</a>` : esc(p.nombre)}</strong>${p.detalle ? `<br>${esc(p.detalle)}` : ''}`;
+    const html = `<strong>${p.href ? `<a href="${esc(p.href)}">${esc(p.nombre)}</a>` : esc(p.nombre)}</strong>${p.detalle ? `<br>${esc(p.detalle)}` : ''}<br><a href="${esc(p.ruta)}" rel="noopener noreferrer">Cómo llegar</a>`;
     L.marker([p.lat, p.lon], { icon, title: p.nombre, alt: p.nombre }).addTo(map).bindPopup(html);
     bounds.push([p.lat, p.lon]);
   }

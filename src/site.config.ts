@@ -35,6 +35,10 @@ export const siteConfig = {
 
   // Mapa
   map: { center: [-11.0, -66.1] as [number, number], zoom: 7 },
+  // Botón «Cómo llegar»: abre la ruta en OpenStreetMap (no envía datos a terceros).
+  // Alternativa que abre la aplicación de mapas del teléfono, a cambio de pasar por Google:
+  // 'https://www.google.com/maps/dir/?api=1&destination={lat},{lon}'
+  directionsUrl: 'https://www.openstreetmap.org/directions?to={lat}%2C{lon}',
 
   // Colores (se aplican como variables CSS)
   colors: {
@@ -43,6 +47,17 @@ export const siteConfig = {
     earth: '#6b4a2f',
     cream: '#f7f1e3',
     asai: '#4b2a5c',
+  },
+  // Colores del tema oscuro: rellenos con texto blanco (forest, asai) y textos claros
+  // sobre fondo oscuro (link, heading, accent). Verificar contraste AA al cambiarlos.
+  colorsDark: {
+    forest: '#2c6a4f',
+    forestDark: '#0c1d15',
+    cream: '#181e1a',
+    asai: '#6b3f80',
+    link: '#8fd1a6',
+    heading: '#d6e8cf',
+    accent: '#d3b2e6',
   },
 
   demoNotice: 'Sitio de demostración: nombres y datos inventados. WhatsApp se abre con el mensaje ya escrito y usted elige a quién enviarlo.',

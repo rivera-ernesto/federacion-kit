@@ -9,6 +9,7 @@ const noticias = await getNoticias();
   <PageHead title="Noticias" lead="Ferias, eventos, oportunidades y novedades de las asociaciones." />
   <section class="block">
     <div class="wrap">
+      <h2 class="sr-only">Noticias y eventos</h2>
       <ul class="grid-cards">
         {noticias.map((n) => <NewsCard noticia={n} />)}
       </ul>

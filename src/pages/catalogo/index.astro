@@ -10,7 +10,7 @@ const orgById = new Map(orgs.map((o) => [o.id, o]));
   <PageHead title="Catálogo de productos" lead="Filtra por categoría o disponibilidad y consulta directamente a la asociación productora." />
   <section class="block">
     <div class="wrap">
-      <form class="filters" data-filters hidden aria-label="Filtros del catálogo">
+      <form class="filters js-only" data-filters aria-label="Filtros del catálogo">
         <div class="field">
           <label for="f-cat">Categoría</label>
           <select id="f-cat" data-filter="categoria">
@@ -28,12 +28,13 @@ const orgById = new Map(orgs.map((o) => [o.id, o]));
       </form>
       <div class="results-bar">
         <p class="status" data-filter-status aria-live="polite"></p>
-        <div class="view-toggle" data-view-toggle role="group" aria-label="Tipo de vista" hidden>
+        <div class="view-toggle js-only" data-view-toggle role="group" aria-label="Tipo de vista">
           <button type="button" data-view="iconos" aria-pressed="true">Íconos</button>
           <button type="button" data-view="lista" aria-pressed="false">Lista</button>
         </div>
       </div>
       <p class="sr-only" role="status" aria-live="polite" data-quick-live></p>
+      <h2 class="sr-only">Productos</h2>
       <ul class="grid-cards" data-results data-view="iconos">
         {productos.map((p) => <ProductCard producto={p} org={orgById.get(p.data.organizacion)!} />)}
       </ul>
