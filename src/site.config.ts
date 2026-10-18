@@ -35,7 +35,7 @@ export const siteConfig = {
 
   // Mapa
   map: { center: [-11.0, -66.1] as [number, number], zoom: 7 },
-  // Botón «Cómo llegar»: abre la ruta en OpenStreetMap (no envía datos a terceros).
+  // Botón «Cómo llegar»: abre la ruta en OpenStreetMap, un servicio abierto y sin publicidad.
   // Alternativa que abre la aplicación de mapas del teléfono, a cambio de pasar por Google:
   // 'https://www.google.com/maps/dir/?api=1&destination={lat},{lon}'
   directionsUrl: 'https://www.openstreetmap.org/directions?to={lat}%2C{lon}',

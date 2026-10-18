@@ -58,7 +58,7 @@ Cada guardado crea un cambio en Git y el sitio se vuelve a publicar solo. La pá
 
 ## Datos de demostración a reemplazar
 
-El video de la galería usa un identificador de ejemplo (`EJEMPLO12345`): cámbielo o bórrelo. Los números de WhatsApp `5917000xxxx` son falsos. Por eso la demostración abre WhatsApp sin destinatario y no muestra el botón «Llamar»: con números reales, ponga `whatsappSinNumero: false` y aparecen los dos. El botón «Cómo llegar» usa las coordenadas de cada asociación y la plantilla `directionsUrl`: por defecto abre OpenStreetMap, que no envía datos a terceros; en la configuración está la alternativa de Google Maps, que abre la aplicación de mapas del teléfono pero pasa por Google.
+El video de la galería usa un identificador de ejemplo (`EJEMPLO12345`): cámbielo o bórrelo. Los números de WhatsApp `5917000xxxx` son falsos. Por eso la demostración abre WhatsApp sin destinatario y no muestra el botón «Llamar»: con números reales, ponga `whatsappSinNumero: false` y aparecen los dos. El botón «Cómo llegar» usa las coordenadas de cada asociación y la plantilla `directionsUrl`: por defecto abre OpenStreetMap, un servicio abierto y sin publicidad; en la configuración está la alternativa de Google Maps, que abre la aplicación de mapas del teléfono pero pasa por Google.
 
 ---
 
