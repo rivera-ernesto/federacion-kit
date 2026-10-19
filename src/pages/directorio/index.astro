@@ -10,7 +10,7 @@ const municipios = [...new Set(orgs.map((o) => o.data.municipio))].sort((a, b) =
   <PageHead title="Directorio de asociaciones" lead="Conoce a quienes producen. Filtra por municipio." />
   <section class="block">
     <div class="wrap">
-      <form class="filters" data-filters hidden aria-label="Filtros">
+      <form class="filters js-only" data-filters aria-label="Filtros">
         <div class="field">
           <label for="f-municipio">Municipio</label>
           <select id="f-municipio" data-filter="municipio">
@@ -20,6 +20,7 @@ const municipios = [...new Set(orgs.map((o) => o.data.municipio))].sort((a, b) =
         </div>
       </form>
       <p class="status" data-filter-status aria-live="polite"></p>
+      <h2 class="sr-only">Asociaciones</h2>
       <ul class="grid-cards">
         {orgs.map((o) => <OrgCard org={o} />)}
       </ul>

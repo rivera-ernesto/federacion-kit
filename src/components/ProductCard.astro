@@ -24,7 +24,7 @@ const d = producto.data;
     <span class={`badge ${d.disponibilidad}`}>{disponibilidades[d.disponibilidad]}</span>
     <h3><a href={url(`/catalogo/${producto.id}/`)}>{d.nombre}</a></h3>
     <p class="meta"><span class="cat">{categorias[d.categoria]} · </span>{org.data.nombre}</p>
-    <div class="quick" data-quick hidden>
+    <div class="quick js-only" data-quick>
       <div class="qty" role="group" aria-label={`Cantidad de ${d.nombre}`}>
         <button type="button" data-qty-minus aria-label={`Menos ${d.nombre}`}>−</button>
         <input type="number" inputmode="numeric" min="1" max="9999" step="1" value="1" data-qty-input aria-label={`Cantidad de ${d.nombre}`} />

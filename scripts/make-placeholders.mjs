@@ -50,7 +50,6 @@ const motifs = {
 
 const files = {
   'hero': ['#dcebe0', '#8fbf9f', 'rio'],
-  'og-default': ['#dcebe0', '#6fa684', 'bosque'],
   'org-rio-claro': ['#d6e8e4', '#7db7b2', 'rio'], 'org-rio-claro-2': ['#dcebe0', '#9bc5a8', 'casa'],
   'org-castanal-del-norte': ['#e6dcc2', '#b8a070', 'bosque'], 'org-castanal-del-norte-2': ['#efe6d0', '#c9b98a', 'taller'],
   'org-mujeres-del-asai': ['#e7dcec', '#a58ab5', 'taller'], 'org-mujeres-del-asai-2': ['#dcebe0', '#8fbf9f', 'casa'],

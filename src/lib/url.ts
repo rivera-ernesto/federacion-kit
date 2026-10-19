@@ -15,6 +15,11 @@ export function url(path = '/'): string {
   return `${base}/${p}${m[2]}`;
 }
 
+/** Enlace «Cómo llegar» a unas coordenadas, según la plantilla de site.config.ts. */
+export function directionsUrl(lat: number, lon: number): string {
+  return siteConfig.directionsUrl.replace('{lat}', String(lat)).replace('{lon}', String(lon));
+}
+
 /** URL absoluta (para canonical, Open Graph, JSON-LD). */
 export function absoluteUrl(path = '/'): string {
   const site = (import.meta.env.SITE || siteConfig.site).replace(/\/+$/, '');

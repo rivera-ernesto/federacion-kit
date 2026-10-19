@@ -19,10 +19,11 @@ Para publicarlo en una subruta (por ejemplo GitHub Pages): `SITE_URL=https://usu
 
 | Qué | Dónde |
 | --- | --- |
-| Nombre, WhatsApp, correo, colores, mapa, URL | `src/site.config.ts` |
+| Nombre, WhatsApp, correo, colores (claro y oscuro), mapa, URL | `src/site.config.ts` |
 | Asociaciones, productos, noticias | `src/content/organizaciones`, `productos`, `noticias` (Markdown) |
 | Galería | `src/content/galeria/galeria.yaml` |
 | Imágenes | `public/media/` |
+| Imagen para compartir en redes (1200×630) | `public/media/og.png`, se genera con `node scripts/make-og.mjs` |
 | Páginas y componentes | `src/pages`, `src/components`, `src/layouts` |
 | Estilos (un solo CSS) | `src/styles/global.css` |
 | Panel de edición | `.pages.yml` |
@@ -32,6 +33,10 @@ Para publicarlo en una subruta (por ejemplo GitHub Pages): `SITE_URL=https://usu
 
 No es una tienda: no hay precios ni pagos. La persona agrega productos a una lista (se guarda solo en su navegador), anota cantidades, y el sitio arma un mensaje de WhatsApp por asociación. No hay servidor ni base de datos.
 
+## Tema claro y oscuro
+
+El sitio sigue el modo claro u oscuro del teléfono o la computadora. El botón de modo oscuro, en la cabecera, lo cambia a mano y el navegador recuerda la elección. Los colores del tema oscuro están en `colorsDark` de `src/site.config.ts`; si los cambia, revise que el texto se lea bien en los dos temas.
+
 ## Formulario de contacto
 
 Si `formEndpoint` en `src/site.config.ts` está vacío, el formulario abre WhatsApp o el correo con el mensaje escrito. Si se pone la URL de un servicio de formularios (Formspree, Getform, etc.), el formulario envía los datos allí.
@@ -40,7 +45,7 @@ Si `formEndpoint` en `src/site.config.ts` está vacío, el formulario abre Whats
 
 1. Subir el repositorio a GitHub.
 2. Entrar a <https://app.pagescms.org/>, iniciar sesión con GitHub e instalar la aplicación sobre el repositorio.
-3. Invitar a las personas editoras como colaboradoras del repositorio.
+3. Invitar a las personas que editan por correo electrónico desde Pages CMS. No necesitan cuenta de GitHub.
 
 Cada guardado crea un cambio en Git y el sitio se vuelve a publicar solo. La página `/admin/` del sitio explica esto a las personas editoras; su enlace sale de `adminUrl` en la configuración.
 
@@ -53,7 +58,7 @@ Cada guardado crea un cambio en Git y el sitio se vuelve a publicar solo. La pá
 
 ## Datos de demostración a reemplazar
 
-El video de la galería usa un identificador de ejemplo (`EJEMPLO12345`): cámbielo o bórrelo. Los números de WhatsApp `5917000xxxx` son falsos.
+El video de la galería usa un identificador de ejemplo (`EJEMPLO12345`): cámbielo o bórrelo. Los números de WhatsApp `5917000xxxx` son falsos. Por eso la demostración abre WhatsApp sin destinatario y no muestra el botón «Llamar»: con números reales, ponga `whatsappSinNumero: false` y aparecen los dos. El botón «Cómo llegar» usa las coordenadas de cada asociación y la plantilla `directionsUrl`: por defecto abre OpenStreetMap, el mismo mapa abierto del sitio; en la configuración está la alternativa de Google Maps, que abre su aplicación si está instalada, a cambio de pasar por Google.
 
 ---
 
@@ -63,8 +68,8 @@ A forkable Astro static site for a federation of producer associations: associat
 
 Make it yours in 5 steps:
 
-1. **Edit `src/site.config.ts`**: name, tagline, WhatsApp, email, social links, map center, colors, `site` and `base`.
+1. **Edit `src/site.config.ts`**: name, tagline, WhatsApp, email, social links, map center, colors (light and dark), `site` and `base`. Then run `node scripts/make-og.mjs` to redraw the share image.
 2. **Replace the content** in `src/content/` and the images in `public/media/` (or delete the demo files first). Schemas are in `src/content.config.ts`.
-3. **Connect Pages CMS**: push to GitHub, open <https://app.pagescms.org/>, install it on the repo, invite editors. `.pages.yml` is already configured; set `adminUrl`.
+3. **Connect Pages CMS**: push to GitHub, open <https://app.pagescms.org/>, install it on the repo, invite editors by email (they need no GitHub account). `.pages.yml` is already configured; set `adminUrl`.
 4. **Deploy to a static host**: the included GitHub Actions workflow publishes to GitHub Pages (Settings → Pages → Source: GitHub Actions). Any static host works with `npm run build` and the `dist/` folder; set `SITE_URL` and `BASE_PATH` if you are not at the domain root.
-5. **Set your domain**: add it in your host's settings, then update `site` in `src/site.config.ts` (or `SITE_URL`) and the `Sitemap:` line in `public/robots.txt`.
+5. **Set your domain**: add it in your host's settings, then update `site` in `src/site.config.ts` (or `SITE_URL`); `robots.txt` and the sitemap are generated from it at build time.
